@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>랜덤 다시 태어나기</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #f3f4f6;
+    color: #171717;
+    font-family:
+      -apple-system, BlinkMacSystemFont,
+      "Pretendard", "Noto Sans KR",
+      "Segoe UI", sans-serif;
+  }
+
+  .wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 16px 50px;
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+  }
+
+  .subtitle {
+    margin-bottom: 18px;
+    color: #666;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .label {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 5px;
+  }
+
+  .value {
+    font-size: 20px;
+    font-weight: 700;
+    word-break: keep-all;
+  }
+
+  #mapBox {
+    position: relative;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  #worldMap {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .country {
+    fill: #e6e8eb;
+    stroke: #fff;
+    stroke-width: .55;
+  }
+
+  .country.selected {
+    fill: #ffcc4d;
+    stroke: #222;
+    stroke-width: 1.4;
+  }
+
+  #loading {
+    padding: 60px 20px;
+    text-align: center;
+    color: #777;
+  }
+
+  #result {
+    display: none;
+    margin-top: 12px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #fff7d6;
+    border: 1px solid #e8ca58;
+  }
+
+  #result strong {
+    font-size: 25px;
+  }
+
+  #detail {
+    margin-top: 6px;
+    color: #555;
+  }
+
+  #rebirthBtn {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    padding: 17px;
+    margin-top: 12px;
+    background: #111;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  #rebirthBtn:hover {
+    background: #333;
+  }
+
+  #rebirthBtn:active {
+    transform: translateY(1px);
+  }
+
+  .bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .history {
+    margin-top: 7px;
+    line-height: 1.7;
+    word-break: keep-all;
+  }
+
+  .note {
+    margin-top: 14px;
+    color: #777;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .pinOuter {
+    fill: rgba(255, 80, 60, .2);
+    stroke: #e53625;
+    stroke-width: 2;
+  }
+
+  .pinInner {
+    fill: #e53625;
+  }
+
+  @media (max-width: 700px) {
+    .stats {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .bottom {
+      grid-template-columns: 1fr;
+    }
+
+    h1 {
+      font-size: 23px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <h1>🌍 랜덤 다시 태어나기</h1>
+
+  <div class="subtitle">
+    세계 인구 중 인간 한 명을 무작위로 뽑습니다.
+  </div>
+
+  <div class="stats">
+    <div class="card">
+      <div class="label">모델 세계인구</div>
+      <div class="value" id="worldPop">계산 중</div>
+    </div>
+
+    <div class="card">
+      <div class="label">이번 생</div>
+      <div class="value" id="resultCountry">?</div>
+    </div>
+
+    <div class="card">
+      <div class="label">당첨 확률</div>
+      <div class="value" id="resultChance">—</div>
+    </div>
+
+    <div class="card">
+      <div class="label">환생 횟수</div>
+      <div class="value" id="rollCount">0</div>
+    </div>
+  </div>
+
+  <div id="mapBox">
+    <div id="loading">세계지도 불러오는 중…</div>
+
+    <svg
+      id="worldMap"
+      viewBox="0 0 960 500"
+      role="img"
+      aria-label="랜덤 환생 세계지도"
+      style="display:none">
+    </svg>
+  </div>
+
+  <div id="result">
+    당신은
+    <strong id="bigCountry"></strong>에서
+    다시 태어났습니다.
+
+    <div id="detail"></div>
+  </div>
+
+  <button id="rebirthBtn" type="button">
+    🎲 랜덤으로 다시 태어나기
+  </button>
+
+  <div class="bottom">
+
+    <div class="card">
+      <div class="label">추첨 방식</div>
+      <div>
+        국가별 인구만큼 추첨권을 줍니다.
+        세계 인구의 10%를 차지하는 나라라면
+        한 번 누를 때 약 10% 확률입니다.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">최근 환생 · 왼쪽이 과거 / 오른쪽이 최신</div>
+      <div class="history" id="history">
+        아직 없음
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    현재 버전은 국가 단위입니다.
+    지도 위 점은 선택된 국가의 대표 위치이며,
+    실제 도시·동네까지 인구 비례로 추첨하는 기능은 아직 포함하지 않았습니다.
+  </div>
+
+</div>
+
+<script type="module">
+
+import * as d3
+from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
+
+import { feature }
+from "https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/+esm";
+
+import world
+from "https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json/+esm";
+
+const data = [
+["004","아프가니스탄",43.8],["008","알바니아",2.8],["012","알제리",47.4],["020","안도라",0.082],["024","앙골라",39.0],["028","앤티가 바부다",0.094],["032","아르헨티나",45.8],["036","호주",27.0],["040","오스트리아",9.2],["031","아제르바이잔",10.4],
+["044","바하마",0.40],["048","바레인",1.6],["050","방글라데시",175.7],["052","바베이도스",0.28],["112","벨라루스",9.0],["056","벨기에",11.8],["084","벨리즈",0.42],["204","베냉",14.8],["064","부탄",0.79],["068","볼리비아",12.6],
+["070","보스니아 헤르체고비나",3.2],["072","보츠와나",2.5],["076","브라질",212.8],["096","브루나이",0.46],["100","불가리아",6.7],["854","부르키나파소",24.1],["108","부룬디",14.0],["116","캄보디아",17.8],["120","카메룬",29.9],["124","캐나다",40.1],
+["140","중앙아프리카공화국",5.5],["148","차드",21.0],["152","칠레",19.8],["156","중국",1416],["170","콜롬비아",53.4],["174","코모로",0.88],["178","콩고공화국",6.4],["180","콩고민주공화국",112.8],["188","코스타리카",5.2],["384","코트디부아르",32.7],
+["191","크로아티아",3.8],["192","쿠바",10.9],["196","키프로스",1.4],["203","체코",10.9],["208","덴마크",6.0],["262","지부티",1.2],["212","도미니카",0.073],["214","도미니카공화국",11.5],["218","에콰도르",18.4],["818","이집트",118.4],
+["222","엘살바도르",6.4],["226","적도기니",1.9],["232","에리트레아",3.6],["233","에스토니아",1.37],["748","에스와티니",1.25],["231","에티오피아",135.5],["242","피지",0.94],["246","핀란드",5.6],["250","프랑스",66.5],["266","가봉",2.6],
+["270","감비아",2.9],["268","조지아",3.8],["276","독일",84.1],["288","가나",35.1],["300","그리스",10.0],["308","그레나다",0.12],["320","과테말라",18.7],["324","기니",15.1],["624","기니비사우",2.2],["328","가이아나",0.84],
+["332","아이티",11.9],["340","온두라스",11.0],["348","헝가리",9.6],["352","아이슬란드",0.40],["356","인도",1464],["360","인도네시아",285.7],["364","이란",92.4],["368","이라크",47.0],["372","아일랜드",5.4],["376","이스라엘",9.5],
+["380","이탈리아",59.1],["388","자메이카",2.8],["392","일본",123.1],["400","요르단",11.5],["398","카자흐스탄",20.8],["404","케냐",57.5],["296","키리바시",0.14],["408","북한",26.6],["410","대한민국",51.7],["414","쿠웨이트",5.0],
+["417","키르기스스탄",7.3],["418","라오스",7.9],["428","라트비아",1.87],["422","레바논",5.8],["426","레소토",2.3],["430","라이베리아",5.7],["434","리비아",7.5],["438","리히텐슈타인",0.040],["440","리투아니아",2.9],["442","룩셈부르크",0.68],
+["450","마다가스카르",32.7],["454","말라위",22.2],["458","말레이시아",36.0],["462","몰디브",0.53],["466","말리",25.2],["470","몰타",0.55],["584","마셜제도",0.042],["478","모리타니",5.3],["480","모리셔스",1.27],["484","멕시코",131.9],
+["583","미크로네시아",0.11],["498","몰도바",3.0],["492","모나코",0.039],["496","몽골",3.5],["499","몬테네그로",0.63],["504","모로코",38.4],["508","모잠비크",35.6],["104","미얀마",54.9],["516","나미비아",3.1],["520","나우루",0.013],
+["524","네팔",29.6],["528","네덜란드",18.2],["554","뉴질랜드",5.3],["558","니카라과",7.0],["562","니제르",27.9],["566","나이지리아",237.5],["807","북마케도니아",1.82],["578","노르웨이",5.6],["512","오만",5.5],["586","파키스탄",255.2],
+["585","팔라우",0.018],["591","파나마",4.6],["598","파푸아뉴기니",10.8],["600","파라과이",7.0],["604","페루",34.6],["608","필리핀",116.8],["616","폴란드",38.1],["620","포르투갈",10.4],["634","카타르",3.1],["642","루마니아",18.9],
+["643","러시아",144.0],["646","르완다",14.6],["659","세인트키츠 네비스",0.047],["662","세인트루시아",0.18],["670","세인트빈센트 그레나딘",0.10],["882","사모아",0.22],["674","산마리노",0.034],["678","상투메 프린시페",0.24],["682","사우디아라비아",34.6],["686","세네갈",18.9],
+["688","세르비아",6.7],["690","세이셸",0.13],["694","시에라리온",8.9],["702","싱가포르",5.9],["703","슬로바키아",5.5],["705","슬로베니아",2.1],["090","솔로몬제도",0.83],["706","소말리아",19.7],["710","남아프리카공화국",64.7],["728","남수단",12.2],
+["724","스페인",48.9],["144","스리랑카",23.2],["729","수단",51.7],["740","수리남",0.64],["752","스웨덴",10.7],["756","스위스",9.0],["760","시리아",25.6],["158","대만",23.4],["762","타지키스탄",10.8],["834","탄자니아",70.5],
+["764","태국",71.6],["626","동티모르",1.4],["768","토고",9.7],["776","통가",0.10],["780","트리니다드 토바고",1.5],["788","튀니지",12.3],["792","튀르키예",87.7],["795","투르크메니스탄",7.6],["798","투발루",0.011],["800","우간다",51.4],
+["804","우크라이나",37.9],["784","아랍에미리트",11.3],["826","영국",69.6],["840","미국",347.3],["858","우루과이",3.4],["860","우즈베키스탄",37.1],["548","바누아투",0.34],["862","베네수엘라",28.5],["704","베트남",101.6],["887","예멘",41.8],
+["894","잠비아",21.9],["716","짐바브웨",17.0],["275","팔레스타인",5.6],["383","코소보",1.7],["732","서사하라",0.6]
+].map(([id,name,pop]) => ({
+  id,
+  name,
+  pop: pop * 1000000
+}));
+
+const total = d3.sum(data, d => d.pop);
+
+document.getElementById("worldPop").textContent =
+  (total / 100000000).toFixed(2) + "억";
+
+function formatPopulation(n) {
+  if (n >= 100000000) {
+    return (n / 100000000).toFixed(2) + "억";
+  }
+  if (n >= 10000) {
+    return Math.round(n / 10000).toLocaleString("ko-KR") + "만";
+  }
+  return Math.round(n).toLocaleString("ko-KR");
+}
+
+function formatProbability(p) {
+  const percent = p * 100;
+  if (percent >= 1) return percent.toFixed(2) + "%";
+  if (percent >= 0.01) return percent.toFixed(3) + "%";
+  return percent.toFixed(5) + "%";
+}
+
+function secureRandom() {
+  const values = new Uint32Array(1);
+  crypto.getRandomValues(values);
+  return values[0] / 4294967296;
+}
+
+function weightedPick() {
+  let random = secureRandom() * total;
+  for (const item of data) {
+    random -= item.pop;
+    if (random < 0) {
+      return item;
+    }
+  }
+  return data[data.length - 1];
+}
+
+const countries =
+  feature(world, world.objects.countries);
+
+const projection =
+  d3.geoNaturalEarth1()
+    .fitExtent(
+      [[10, 10], [950, 490]],
+      countries
+    );
+
+const path =
+  d3.geoPath(projection);
+
+const svg =
+  d3.select("#worldMap");
+
+svg.append("g")
+  .selectAll("path")
+  .data(countries.features)
+  .join("path")
+  .attr("class", "country")
+  .attr("data-id", d => String(+d.id))
+  .attr("d", path);
+
+const pinLayer =
+  svg.append("g");
+
+document.getElementById("loading").style.display = "none";
+document.getElementById("worldMap").style.display = "block";
+
+let rolls = 0;
+const history = [];
+
+function rebirth() {
+  const result = weightedPick();
+  rolls++;
+
+  const probability = result.pop / total;
+  const oneIn = Math.round(1 / probability);
+
+  document.getElementById("resultCountry").textContent =
+    result.name;
+
+  document.getElementById("resultChance").textContent =
+    formatProbability(probability);
+
+  document.getElementById("rollCount").textContent =
+    rolls.toLocaleString("ko-KR");
+
+  document.getElementById("bigCountry").textContent =
+    result.name;
+
+  document.getElementById("detail").textContent =
+    "모델 인구 약 " +
+    formatPopulation(result.pop) +
+    "명 · 세계의 " +
+    formatProbability(probability) +
+    " · 약 " +
+    oneIn.toLocaleString("ko-KR") +
+    "번 중 1번";
+
+  document.getElementById("result").style.display =
+    "block";
+
+  svg.selectAll(".country")
+    .classed(
+      "selected",
+      d => String(+d.id) === String(+result.id)
+    );
+
+  pinLayer.selectAll("*").remove();
+
+  const countryFeature =
+    countries.features.find(
+      d => String(+d.id) === String(+result.id)
+    );
+
+  if (countryFeature) {
+    const centroid =
+      projection(
+        d3.geoCentroid(countryFeature)
+      );
+
+    if (
+      centroid &&
+      Number.isFinite(centroid[0]) &&
+      Number.isFinite(centroid[1])
+    ) {
+      pinLayer.append("circle")
+        .attr("class", "pinOuter")
+        .attr("cx", centroid[0])
+        .attr("cy", centroid[1])
+        .attr("r", 10);
+
+      pinLayer.append("circle")
+        .attr("class", "pinInner")
+        .attr("cx", centroid[0])
+        .attr("cy", centroid[1])
+        .attr("r", 4);
+    }
+  }
+
+  history.push(result.name);
+
+  if (history.length > 6) {
+    history.shift();
+  }
+
+  document.getElementById("history").textContent =
+    history.join(" → ");
+}
+
+document
+  .getElementById("rebirthBtn")
+  .addEventListener("click", rebirth);
+
+</script>
+
+</body>
+</html>
