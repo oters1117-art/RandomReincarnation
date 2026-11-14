@@ -6,22 +6,35 @@
 <title>랜덤 다시 태어나기</title>
 
 <style>
+  /* dovemayo.com 랜덤 캐릭터 생성기와 같은 색·모서리·버튼 */
+  :root {
+    --page: #f4f1ee;
+    --card: #ffffff;
+    --ink: #2b2523;
+    --muted: #7d726e;
+    --rule: #e4ddd8;
+    --accent: #5d4e48;
+    --on: #c9573f;
+  }
+
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background: #f3f4f6;
-    color: #171717;
-    font-family:
-      -apple-system, BlinkMacSystemFont,
-      "Pretendard", "Noto Sans KR",
-      "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    font: 15px/1.55 "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
   }
 
   .wrap {
     max-width: 1000px;
     margin: 0 auto;
-    padding: 24px 16px 50px;
+    padding: 28px 16px 56px;
+  }
+
+  .back {
+    font-size: 13px;
+    color: var(--muted);
   }
 
   .titleRow {
@@ -29,12 +42,12 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 6px;
+    margin: 6px 0 4px;
   }
 
   h1 {
     margin: 0;
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .modeSwitch {
@@ -42,34 +55,35 @@
     flex-shrink: 0;
     padding: 3px;
     border-radius: 999px;
-    background: #e5e7eb;
+    background: var(--card);
+    border: 1px solid var(--rule);
   }
 
   .modeSwitch button {
     border: 0;
     border-radius: 999px;
-    padding: 8px 13px;
+    padding: 7px 13px;
     background: transparent;
-    color: #555;
+    color: var(--muted);
     font: inherit;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
   }
 
   .modeSwitch button.active {
-    background: #111;
+    background: var(--accent);
     color: #fff;
   }
 
-  .modeSwitch button:focus-visible {
-    outline: 3px solid rgba(17, 17, 17, .25);
+  button:focus-visible, a:focus-visible {
+    outline: 2px solid var(--on);
     outline-offset: 2px;
   }
 
   .subtitle {
-    margin-bottom: 18px;
-    color: #666;
+    margin-bottom: 16px;
+    color: var(--muted);
   }
 
   .stats {
@@ -80,16 +94,16 @@
   }
 
   .card {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 14px;
-    padding: 14px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    padding: 14px 16px;
   }
 
   .label {
-    font-size: 13px;
-    color: #777;
-    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
   }
 
   .value {
@@ -100,10 +114,11 @@
 
   #mapBox {
     position: relative;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 28px;
     overflow: hidden;
+    box-shadow: 0 1px 2px rgba(60, 40, 30, .08), 0 12px 32px rgba(60, 40, 30, .10);
   }
 
   #worldMap {
@@ -113,39 +128,40 @@
   }
 
   .country {
-    fill: #e6e8eb;
+    fill: #ebe6e2;
     stroke: #fff;
     stroke-width: .55;
   }
 
   .country.selected {
-    fill: #ffcc4d;
-    stroke: #222;
-    stroke-width: 1.4;
+    fill: #efc2ae;
+    stroke: var(--ink);
+    stroke-width: 1.2;
   }
 
   #loading {
     padding: 60px 20px;
     text-align: center;
-    color: #777;
+    color: var(--muted);
   }
 
   #result {
     display: none;
     margin-top: 12px;
-    padding: 18px;
-    border-radius: 14px;
-    background: #fff7d6;
-    border: 1px solid #e8ca58;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: #fbf2ed;
+    border: 1px solid #ecd3c7;
   }
 
   #result strong {
-    font-size: 25px;
+    font-size: 24px;
+    color: var(--on);
   }
 
   #detail {
     margin-top: 6px;
-    color: #555;
+    color: var(--muted);
     line-height: 1.65;
   }
 
@@ -156,19 +172,20 @@
   #rebirthBtn {
     display: block;
     width: 100%;
-    border: 0;
-    border-radius: 14px;
-    padding: 17px;
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px;
     margin-top: 12px;
-    background: #2563eb;
-    color: white;
-    font-size: 18px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-size: 17px;
     font-weight: 700;
     cursor: pointer;
   }
 
   #rebirthBtn:hover {
-    background: #1d4ed8;
+    background: #4d403b;
   }
 
   #rebirthBtn:active {
@@ -183,16 +200,20 @@
   }
 
   .history {
-    margin-top: 7px;
+    margin-top: 6px;
     line-height: 1.7;
     word-break: keep-all;
   }
 
   .note {
     margin-top: 14px;
-    color: #777;
-    font-size: 13px;
+    color: var(--muted);
+    font-size: 12px;
     line-height: 1.6;
+  }
+
+  .note a {
+    color: var(--muted);
   }
 
   .updatedAt {
@@ -216,10 +237,10 @@
     min-width: 190px;
     height: 40px;
     padding: 9px 16px;
-    border: 0;
-    border-radius: 8px;
-    background: #e5e7eb;
-    color: #888;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--muted);
     font: inherit;
     font-size: 14px;
     cursor: pointer;
@@ -229,12 +250,13 @@
 
   #supportBtn:hover,
   #creatorWebsiteLink:hover {
-    background: #d1d5db;
-    color: #666;
+    border-color: #c9beb8;
+    color: var(--ink);
   }
 
   #supportBtn.celebrating {
-    background: #ef4444;
+    background: var(--on);
+    border-color: var(--on);
     color: #fff;
   }
 
@@ -245,13 +267,13 @@
   }
 
   .pinOuter {
-    fill: rgba(255, 80, 60, .2);
-    stroke: #e53625;
+    fill: rgba(201, 87, 63, .2);
+    stroke: var(--on);
     stroke-width: 2;
   }
 
   .pinInner {
-    fill: #e53625;
+    fill: var(--on);
   }
 
   @media (max-width: 700px) {
@@ -263,12 +285,8 @@
       grid-template-columns: 1fr 1fr;
     }
 
-    .bottom {
-      grid-template-columns: 1fr;
-    }
-
     h1 {
-      font-size: 23px;
+      font-size: 21px;
     }
   }
 </style>
@@ -278,8 +296,10 @@
 
 <div class="wrap">
 
+  <a class="back" href="https://dovemayo.com/">← dovemayo.com</a>
+
   <div class="titleRow">
-    <h1>🌍 랜덤 다시 태어나기</h1>
+    <h1>랜덤 다시 태어나기</h1>
 
     <div class="modeSwitch" role="group" aria-label="추첨 기준 선택">
       <button type="button" class="active" data-mode="births" aria-pressed="true">출생아 기준</button>
@@ -334,7 +354,7 @@
   </div>
 
   <button id="rebirthBtn" type="button">
-    🎲 랜덤으로 다시 태어나기
+    랜덤으로 다시 태어나기
   </button>
 
   <div class="bottom">
