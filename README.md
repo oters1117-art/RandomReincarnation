@@ -2,7 +2,7 @@
 
 다시 태어난다면 어느 나라에서 태어날까? 전 세계 인구 비율대로 국가를 무작위로 뽑아 보여 주는 웹페이지입니다.
 
-👉 **https://oters1117-art.github.io/random-respawn/**
+👉 **https://oters1117-art.github.io/RandomReincarnation/**
 
 ## 기능
 
